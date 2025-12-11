@@ -4,12 +4,46 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>moveyohead</title>
+    <title>MoveYoHead</title>
   </head>
   <body>
     <div id="app"></div>
     <canvas id="bg"></canvas>
     <video id="webcam" autoplay playsinline style="display: none;"></video>
+
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="loading-modal">
+      <div class="loading-content">
+        <h1 class="loading-title">Welcome to MoveYoHead</h1>
+        <p class="loading-description">
+          This is a demo project exploring WebAI concepts. Experience how eye tracking and
+          Three.js can create immersive interactions. Move your head to look around,
+          close your eyes to teleport between dimensions.
+        </p>
+        <div id="loading-status" class="loading-status">Initializing...</div>
+        <div id="loading-progress" class="loading-progress">
+          <div id="loading-bar" class="loading-bar"></div>
+        </div>
+        <button id="begin-button" class="begin-button" style="display: none;">
+          Begin Journey
+        </button>
+      </div>
+    </div>
+
+    <!-- Transition Overlay -->
+    <div id="transition-overlay" class="transition-overlay"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Credit btn -->
+    <div class="credit-button">
+      <span class="credit-icon">?</span>
+      <div class="credit-tooltip">
+       <a href="https://skfb.ly/ovoBo" target="_blank">"Stylized Mangrove Greenhouse"</a> by Bársh is licensed under <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons Attribution</a>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

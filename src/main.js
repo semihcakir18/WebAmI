@@ -2,6 +2,11 @@ import "./style.css";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+import { SceneManager } from "./sceneManager.js";
+import { LoadingModal } from "./loadingModal.js";
+import { BlinkDetector } from "./blinkDetector.js";
+import { TransitionController } from "./transitionController.js";
+import { showToast } from "./toastNotification.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -32,6 +37,9 @@ let eyeData = {
   eyeLookOutRight: 0,
   eyeLookUpLeft: 0,
   eyeLookUpRight: 0,
+  // Blink detection
+  eyeBlinkLeft: 0,
+  eyeBlinkRight: 0,
 };
 
 // Initialize MediaPipe FaceLandmarker
@@ -104,33 +112,59 @@ function predictWebcam() {
   window.requestAnimationFrame(predictWebcam);
 }
 
-// Start face detection
-initFaceLandmarker();
-
-// Load GLB model
+// Initialize scene manager
 const loader = new GLTFLoader();
-loader.load(
-  "/stylized_mangrove_greenhouse.glb", // GLB file from public folder
-  function (gltf) {
-    // Success callback - model loaded
-    scene.add(gltf.scene);
+const sceneManager = new SceneManager(scene, loader);
 
-    // Optional: Position, scale, or rotate the model
-    // gltf.scene.position.set(0, 0, 0);
-    // gltf.scene.scale.set(1, 1, 1);
-    // gltf.scene.rotation.y = Math.PI / 4;
+// Initialize controllers
+const blinkDetector = new BlinkDetector();
+const transitionController = new TransitionController(sceneManager);
 
-    console.log("Model loaded successfully");
-  },
-  function (xhr) {
-    // Progress callback
-    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-  },
-  function (error) {
-    // Error callback
-    console.error("An error occurred loading the model:", error);
+// Initialize loading modal
+const loadingModal = new LoadingModal();
+
+// Start initialization flow
+async function initialize() {
+  // Request webcam permission
+  const webcamGranted = await loadingModal.requestWebcamPermission();
+
+  if (!webcamGranted) {
+    // Permission denied, block entry
+    return;
   }
-);
+
+  // Initialize MediaPipe
+  loadingModal.updateStatus("Loading face detection model...");
+  await initFaceLandmarker();
+
+  // Load first scene
+  loadingModal.updateStatus("Loading first scene...");
+  await sceneManager.loadScene(0, (xhr) => {
+    const percent = (xhr.loaded / xhr.total) * 100;
+    loadingModal.updateProgress(percent);
+  });
+
+  // Switch to first scene
+  sceneManager.switchToScene(0);
+
+  // Enable begin button
+  loadingModal.enableBeginButton();
+}
+
+// Handle begin journey
+loadingModal.onBegin(() => {
+  console.log("Beginning journey...");
+  loadingModal.hide();
+
+  // Start background loading of remaining scenes
+  sceneManager.preloadNextScenes(1, (index) => {
+    console.log(`Scene ${index} loaded in background`);
+    showToast("Close your eyes for 3 seconds to teleport to another dimension");
+  });
+});
+
+// Start initialization
+initialize();
 
 // Camera rotation state
 let targetRotationX = 0;
@@ -151,8 +185,8 @@ function animate() {
   const horizontalLook = lookLeft - lookRight; // Inverted for head rotation
 
   // Vertical rotation (looking up/down)
-  const lookUp = (eyeData.eyeLookUpLeft + eyeData.eyeLookUpRight) / 2;
-  const lookDown = (eyeData.eyeLookDownLeft + eyeData.eyeLookDownRight) / 2;
+  const lookUp = (eyeData.eyeLookUpLeft + eyeData.eyeLookUpRight) / 4;
+  const lookDown = (eyeData.eyeLookDownLeft + eyeData.eyeLookDownRight) / 4;
   const verticalLook = lookDown - lookUp;
 
   // Set target rotations
@@ -166,6 +200,21 @@ function animate() {
   // Apply rotation to camera
   camera.rotation.x = currentRotationX;
   camera.rotation.y = currentRotationY;
+
+  // Check for blink transition (only if not currently transitioning)
+  if (blinkDetector.detectBlink(eyeData) && !transitionController.getIsTransitioning()) {
+    const currentIndex = sceneManager.getCurrentIndex();
+    const totalScenes = sceneManager.getTotalScenes();
+    const nextIndex = (currentIndex + 1) % totalScenes;
+
+    // Only transition if next scene is loaded
+    if (sceneManager.isSceneLoaded(nextIndex)) {
+      console.log(`Triggering transition from scene ${currentIndex} to ${nextIndex}`);
+      transitionController.transitionToScene(nextIndex);
+    } else {
+      console.log(`Scene ${nextIndex} not loaded yet, cannot transition`);
+    }
+  }
 
   renderer.render(scene, camera);
 }
