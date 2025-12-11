@@ -148,7 +148,7 @@ function animate() {
   // Horizontal rotation (looking left/right)
   const lookLeft = (eyeData.eyeLookInLeft + eyeData.eyeLookOutRight) / 2;
   const lookRight = (eyeData.eyeLookOutLeft + eyeData.eyeLookInRight) / 2;
-  const horizontalLook = lookRight - lookLeft;
+  const horizontalLook = lookLeft - lookRight; // Inverted for head rotation
 
   // Vertical rotation (looking up/down)
   const lookUp = (eyeData.eyeLookUpLeft + eyeData.eyeLookUpRight) / 2;
