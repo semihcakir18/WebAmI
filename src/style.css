@@ -54,9 +54,10 @@ canvas {
   color: white;
   padding: 12px 16px;
   border-radius: 8px;
+  width: 40vw;;
   font-size: 14px;
   line-height: 1.5;
-  white-space: nowrap;
+  white-space: normal;
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);
@@ -127,8 +128,8 @@ canvas {
 }
 
 .loading-description {
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 17px;
+  line-height: 1.8;
   margin-bottom: 30px;
   color: rgba(255, 255, 255, 0.8);
 }

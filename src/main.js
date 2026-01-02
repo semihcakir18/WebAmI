@@ -114,7 +114,7 @@ function predictWebcam() {
 
 // Initialize scene manager
 const loader = new GLTFLoader();
-const sceneManager = new SceneManager(scene, loader);
+const sceneManager = new SceneManager(scene, loader, camera);
 
 // Initialize controllers
 const blinkDetector = new BlinkDetector();
@@ -147,6 +147,13 @@ async function initialize() {
   // Switch to first scene
   sceneManager.switchToScene(0);
 
+  // Store base rotation after scene switch
+  if (sceneManager.baseRotation) {
+    baseRotationX = sceneManager.baseRotation.x;
+    baseRotationY = sceneManager.baseRotation.y;
+    baseRotationZ = sceneManager.baseRotation.z;
+  }
+
   // Enable begin button
   loadingModal.enableBeginButton();
 }
@@ -171,6 +178,9 @@ let targetRotationX = 0;
 let targetRotationY = 0;
 let currentRotationX = 0;
 let currentRotationY = 0;
+let baseRotationX = 0; // Base rotation from scene setup
+let baseRotationY = 0;
+let baseRotationZ = 0;
 const smoothingFactor = 0.05; // Lower = smoother, higher = more responsive
 const rotationMultiplier = 3; // Increase for more dramatic camera movement
 
@@ -197,9 +207,10 @@ function animate() {
   currentRotationX += (targetRotationX - currentRotationX) * smoothingFactor;
   currentRotationY += (targetRotationY - currentRotationY) * smoothingFactor;
 
-  // Apply rotation to camera
-  camera.rotation.x = currentRotationX;
-  camera.rotation.y = currentRotationY;
+  // Apply rotation to camera (base rotation + eye tracking offset)
+  camera.rotation.x = baseRotationX + currentRotationX;
+  camera.rotation.y = baseRotationY + currentRotationY;
+  camera.rotation.z = baseRotationZ;
 
   // Check for blink transition (only if not currently transitioning)
   if (blinkDetector.detectBlink(eyeData) && !transitionController.getIsTransitioning()) {
@@ -210,7 +221,14 @@ function animate() {
     // Only transition if next scene is loaded
     if (sceneManager.isSceneLoaded(nextIndex)) {
       console.log(`Triggering transition from scene ${currentIndex} to ${nextIndex}`);
-      transitionController.transitionToScene(nextIndex);
+      transitionController.transitionToScene(nextIndex).then(() => {
+        // Update base rotation after scene transition
+        if (sceneManager.baseRotation) {
+          baseRotationX = sceneManager.baseRotation.x;
+          baseRotationY = sceneManager.baseRotation.y;
+          baseRotationZ = sceneManager.baseRotation.z;
+        }
+      });
     } else {
       console.log(`Scene ${nextIndex} not loaded yet, cannot transition`);
     }

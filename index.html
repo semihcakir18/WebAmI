@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,22 +9,35 @@
   <body>
     <div id="app"></div>
     <canvas id="bg"></canvas>
-    <video id="webcam" autoplay playsinline style="display: none;"></video>
+    <video id="webcam" autoplay playsinline style="display: none"></video>
 
     <!-- Loading Modal -->
     <div id="loading-modal" class="loading-modal">
       <div class="loading-content">
         <h1 class="loading-title">Welcome to MoveYoHead</h1>
         <p class="loading-description">
-          This is a demo project exploring WebAI concepts. Experience how eye tracking and
-          Three.js can create immersive interactions. Move your head to look around,
-          close your eyes to teleport between dimensions.
+          This is a small demo project where I’m exploring WebAI concepts. I was
+          genuinely mesmerized when I realized I could build AI-powered
+          experiences using plain JavaScript. For a long time, I felt torn
+          between AI and web development. I enjoyed both and could not quite
+          choose a direction. Somehow, I do not know how, I had never heard of
+          WebAI before. Thanks to
+          <a href="https://www.linkedin.com/in/webai/" target="_blank"
+            >Jason Mayes</a
+          >
+          and the people who organized DevFest Istanbul, I have discovered a new
+          passion that brings these two worlds together. I chose a VR-like,
+          first-person experience because the AI model was already available
+          (MediaPipe), and I wanted to finally face something I had always
+          avoided. 3D development always intimidated me, but at the same time, I
+          have always loved websites that use it. This project is my way of
+          stepping into that space.
         </p>
         <div id="loading-status" class="loading-status">Initializing...</div>
         <div id="loading-progress" class="loading-progress">
           <div id="loading-bar" class="loading-bar"></div>
         </div>
-        <button id="begin-button" class="begin-button" style="display: none;">
+        <button id="begin-button" class="begin-button" style="display: none">
           Begin Journey
         </button>
       </div>
@@ -40,7 +53,25 @@
     <div class="credit-button">
       <span class="credit-icon">?</span>
       <div class="credit-tooltip">
-       <a href="https://skfb.ly/ovoBo" target="_blank">"Stylized Mangrove Greenhouse"</a> by Bársh is licensed under <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank">Creative Commons Attribution</a>
+        <a href="https://skfb.ly/ovoBo" target="_blank"
+          >"Stylized Mangrove Greenhouse"</a
+        >
+        by Bársh is licensed under
+        <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank"
+          >Creative Commons Attribution</a
+        ><br /><br />
+        <a href="https://skfb.ly/6V9Ru" target="_blank"
+          >"camping buscraft ambience"</a
+        >
+        by Edgar_koh is licensed under
+        <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank"
+          >Creative Commons Attribution</a
+        ><br /><br />
+        <a href="https://skfb.ly/A6AL" target="_blank">"Minecraft Castle"</a> by
+        patrix is licensed under
+        <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"
+          >Creative Commons Attribution-ShareAlike</a
+        >
       </div>
     </div>
 

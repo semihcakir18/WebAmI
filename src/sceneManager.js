@@ -1,28 +1,38 @@
+import { Color } from "three";
+
 // Scene configuration - easily add/remove scenes here
 export const sceneConfig = [
-  {
-    id: "greenhouse",
-    name: "Mangrove Greenhouse",
-    path: "/stylized_mangrove_greenhouse.glb",
-    position: { x: 0, y: 0, z: 0 },
-    scale: { x: 1, y: 1, z: 1 },
-    rotation: { x: 0, y: 0, z: 0 },
-  },
+    {
+      id: "greenhouse",
+      name: "Mangrove Greenhouse",
+      path: "/stylized_mangrove_greenhouse.glb",
+      position: { x: 0, y: 0, z: 0 },
+      scale: { x: 1, y: 1, z: 1 },
+      rotation: { x: 0, y: 0, z: 0 },
+      cameraPosition: { x: 0, y: 2, z: 1 },
+      background: "#87CEEB",
+    },
   {
     id: "scene2",
     name: "Second Dimension",
-    path: "/scene2.glb",
+    path: "/campfire3.glb",
     position: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
     rotation: { x: 0, y: 0, z: 0 },
+    cameraPosition: { x: 3, y: 1, z:4 },
+    cameraLookAt: { x: 0, y: 0, z: 0 },
+    background: "#0a0a2a",
   },
   {
     id: "scene3",
     name: "Third Dimension",
-    path: "/scene3.glb",
-    position: { x: 0, y: 0, z: 0 },
+    path: "/minecraft_castle.glb",
+    position: { x: -8, y: -8, z: 17 },
     scale: { x: 1, y: 1, z: 1 },
     rotation: { x: 0, y: 0, z: 0 },
+    cameraPosition: { x: 1, y: 12, z: 14 },
+    cameraLookAt: { x: -90, y: 10, z: 170 }, 
+    background: "rgba(110, 113, 108, 1)",
   },
 ];
 
@@ -33,10 +43,12 @@ export class SceneManager {
   /**
    * @param {Object} threeScene - Three.js scene object
    * @param {Object} loader - GLTFLoader instance
+   * @param {Object} camera - Three.js camera object
    */
-  constructor(threeScene, loader) {
+  constructor(threeScene, loader, camera) {
     this.threeScene = threeScene;
     this.loader = loader;
+    this.camera = camera;
     this.config = sceneConfig;
     this.loadedScenes = new Array(this.config.length).fill(null);
     this.currentIndex = -1;
@@ -129,6 +141,50 @@ export class SceneManager {
     // Add new scene to Three.js scene
     this.threeScene.add(this.loadedScenes[index].scene);
     this.currentIndex = index;
+
+    // Update camera position if defined
+    const config = this.config[index];
+    if (config.cameraPosition && this.camera) {
+      this.camera.position.set(
+        config.cameraPosition.x,
+        config.cameraPosition.y,
+        config.cameraPosition.z
+      );
+    }
+
+    // Manually calculate rotation instead of using lookAt to prevent upside-down orientation
+    if (config.cameraLookAt && this.camera) {
+      const dx = config.cameraLookAt.x - config.cameraPosition.x;
+      const dy = config.cameraLookAt.y - config.cameraPosition.y;
+      const dz = config.cameraLookAt.z - config.cameraPosition.z;
+
+      // Calculate horizontal distance for pitch calculation
+      const horizontalDistance = Math.sqrt(dx * dx + dz * dz);
+
+      // Calculate rotations
+      // Y rotation (yaw/horizontal): rotate around vertical axis to face target
+      // Three.js camera default faces -Z, so we use atan2 with flipped signs
+      const rotationY = Math.atan2(-dx, -dz);
+
+      // X rotation (pitch/vertical): tilt up/down to look at target
+      const rotationX = Math.atan2(dy, horizontalDistance);
+
+      // Set camera rotation manually (no roll to stay upright)
+      this.camera.rotation.set(rotationX, rotationY, 0, 'YXZ');
+    }
+
+    // Store the base rotation (for eye tracking offset)
+    this.baseRotation = {
+      x: this.camera.rotation.x,
+      y: this.camera.rotation.y,
+      z: 0  // Keep upright, no roll
+    };
+
+    // Update background if defined
+    if (config.background) {
+      this.threeScene.background = new Color(config.background);
+    }
+
     console.log(`Switched to scene ${index}: ${this.config[index].name}`);
 
     return true;
