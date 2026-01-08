@@ -181,7 +181,7 @@ let currentRotationY = 0;
 let baseRotationX = 0; // Base rotation from scene setup
 let baseRotationY = 0;
 let baseRotationZ = 0;
-const smoothingFactor = 0.05; // Lower = smoother, higher = more responsive
+const smoothingFactor = 0.03; // Lower = smoother, higher = more responsive
 const rotationMultiplier = 3; // Increase for more dramatic camera movement
 
 // Animation loop
