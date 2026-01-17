@@ -175,6 +175,9 @@ export class SceneManager {
       // Reset to default rotation if no cameraLookAt is defined
       this.camera.rotation.set(0, 0, 0, 'YXZ');
     }
+        var audio = new Audio('whoosh.mp3');
+    audio.play();
+    console.log(`Switched to scene ${index}: ${this.config[index].name}`);
 
     // Store the base rotation (for eye tracking offset)
     this.baseRotation = {
@@ -187,9 +190,6 @@ export class SceneManager {
     if (config.background) {
       this.threeScene.background = new Color(config.background);
     }
-    var audio = new Audio('whoosh.mp3');
-    audio.play();
-    console.log(`Switched to scene ${index}: ${this.config[index].name}`);
 
     return true;
   }

@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(git merge:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
