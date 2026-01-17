@@ -7,6 +7,7 @@ import { LoadingModal } from "./loadingModal.js";
 import { BlinkDetector } from "./blinkDetector.js";
 import { TransitionController } from "./transitionController.js";
 import { showToast } from "./toastNotification.js";
+import { FaceMeshRenderer } from "./faceMeshRenderer.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -107,6 +108,9 @@ function predictWebcam() {
       // Optional: Log eye data for debugging (uncomment to see values)
       // console.log("Eye Data:", eyeData);
     }
+
+    // Render face mesh visualization
+    faceMeshRenderer.render(results);
   }
 
   window.requestAnimationFrame(predictWebcam);
@@ -123,8 +127,27 @@ const transitionController = new TransitionController(sceneManager);
 // Initialize loading modal
 const loadingModal = new LoadingModal();
 
+// Initialize FaceMesh renderer
+const video = document.getElementById("webcam");
+const faceMeshRenderer = new FaceMeshRenderer("facemesh-canvas", video);
+
+// Detect mobile device
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         (window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+}
+
 // Start initialization flow
 async function initialize() {
+  // Check if mobile device
+  if (isMobileDevice()) {
+    loadingModal.updateStatus("Mobile view is not supported yet. Please open this on a desktop or switch to desktop mode.");
+    setTimeout(() => {
+      showToast("Mobile view is not supported yet. Please use desktop view for the best experience.");
+    }, 1000);
+    return;
+  }
+
   // Request webcam permission
   const webcamGranted = await loadingModal.requestWebcamPermission();
 
@@ -163,6 +186,9 @@ loadingModal.onBegin(() => {
   console.log("Beginning journey...");
   loadingModal.hide();
 
+  // Show initial instructions
+  showToast("Press T to toggle FaceMesh visualization");
+
   // Start background loading of remaining scenes
   sceneManager.preloadNextScenes(1, (index) => {
     console.log(`Scene ${index} loaded in background`);
@@ -183,6 +209,14 @@ let baseRotationY = 0;
 let baseRotationZ = 0;
 const smoothingFactor = 0.03; // Lower = smoother, higher = more responsive
 const rotationMultiplier = 3; // Increase for more dramatic camera movement
+
+// Keyboard event listener for toggling face mesh
+window.addEventListener("keydown", (event) => {
+  if (event.key === "t" || event.key === "T") {
+    const isVisible = faceMeshRenderer.toggle();
+    showToast(isVisible ? "FaceMesh visualization enabled" : "FaceMesh visualization disabled");
+  }
+});
 
 // Animation loop
 function animate() {
